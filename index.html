@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK SCRIPTERS | DEADLINE</title>
+    <style>
+        :root {
+            --primary: #ffffff;
+            --secondary: #000000;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --accent-glow: rgba(255, 255, 255, 0.2);
+            --discord: #5865F2;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; cursor: crosshair; }
+
+        body {
+            background-color: var(--secondary);
+            color: var(--primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- ADVANCED LIVE BACKGROUND --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+        }
+
+        /* Scanline Effect */
+        body::after {
+            content: " ";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            z-index: 20;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--secondary);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 60px; height: 60px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.4s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- HEADER & STATUS --- */
+        nav { 
+            padding: 40px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            z-index: 30; 
+        }
+
+        .logo { 
+            font-size: 1.2rem; 
+            font-weight: 900; 
+            letter-spacing: 8px; 
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            margin-bottom: 10px;
+        }
+
+        .status-ticker {
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .status-ticker span { color: #00ff00; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- MAIN CARDS --- */
+        .wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; z-index: 25; }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            padding: 60px 50px;
+            width: 100%;
+            max-width: 580px;
+            text-align: center;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardEntrance { 
+            from { opacity: 0; transform: translateY(40px) scale(0.95); filter: blur(10px); } 
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } 
+        }
+
+        h1 { 
+            font-size: 2.5rem; margin-bottom: 25px; letter-spacing: 6px; font-weight: 900;
+            -webkit-box-reflect: below -18px linear-gradient(transparent, rgba(255,255,255,0.08));
+        }
+
+        .credits { font-size: 0.7rem; letter-spacing: 3px; color: #666; margin-bottom: 35px; text-transform: uppercase; }
+        .desc { color: #888; line-height: 2; margin-bottom: 45px; font-size: 0.9rem; letter-spacing: 0.5px; }
+
+        /* --- BUTTONS --- */
+        .btn-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+
+        .btn {
+            background: var(--primary);
+            color: var(--secondary);
+            padding: 18px 50px;
+            border-radius: 4px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            font-size: 0.75rem;
+            position: relative;
+        }
+
+        .btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.3);
+            letter-spacing: 5px;
+        }
+
+        .btn:active { transform: scale(0.92); }
+
+        .btn-secondary { background: transparent; color: var(--primary); border: 1px solid var(--glass-border); }
+        .btn-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.05); }
+
+        .btn-discord {
+            background: var(--discord); color: #fff; width: 100%; max-width: 350px; margin-bottom: 15px; border-radius: 8px;
+        }
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        .input-box {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+            width: 100%;
+            max-width: 380px;
+            margin-bottom: 30px;
+            text-align: center;
+            transition: 0.4s;
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .input-box:focus { border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.1); outline: none; }
+
+        .script-box {
+            background: #050505;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #222;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: #00ffaa;
+            word-break: break-all;
+            margin-top: 25px;
+            box-shadow: inset 0 0 30px rgba(0, 255, 170, 0.05);
+            border-left: 4px solid #00ffaa;
+            text-align: left;
+        }
+
+        /* Special Styling for Arsenic Hub Page */
+        #pg4 { 
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 0 50px rgba(255,255,255,0.1);
+        }
+
+        .page { display: none; }
+        .active { display: block; }
+        
+        footer { position: absolute; bottom: 30px; width: 100%; text-align: center; font-size: 0.6rem; letter-spacing: 6px; opacity: 0.2; }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <div id="loader"><div class="spinner"></div></div>
+
+    <nav>
+        <div class="logo">SK SCRIPTERS</div>
+        <div class="status-ticker">SYSTEM STATUS: <span>FUNCTIONAL</span> // LATENCY: 24MS // ENCRYPTION: AES-256</div>
+    </nav>
+
+    <div class="wrapper">
+        
+        <section id="pg1" class="card page active">
+            <h1>CENTRAL HUB</h1>
+            <p class="desc">Encrypted access point for next-generation Roblox scripting. Verified security layers and community-driven performance.</p>
+            <div class="btn-container">
+                <button class="btn" onclick="popGo('pg2')">AUTHORIZE</button>
+                <button class="btn btn-secondary" onclick="popGo('pg-discord')">NETWORK</button>
+            </div>
+        </section>
+
+        <section id="pg-discord" class="card page">
+            <h1>COMMUNITY</h1>
+            <p class="desc">Sync with our servers for real-time updates and support.</p>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn btn-discord" onclick="window.open('https://discord.gg/36yw3GSEz5', '_blank')">SK SCRIPTERS MAIN</button>
+                <button class="btn btn-discord" style="background: #404eed;" onclick="window.open('https://discord.gg/Z5r77xTt64', '_blank')">DEADLINE BRANCH</button>
+                <p style="margin-top: 25px; cursor: pointer; font-size: 0.7rem; opacity: 0.4; letter-spacing: 3px;" onclick="popGo('pg1')">[ BACK_TO_ROOT ]</p>
+            </div>
+        </section>
+
+        <section id="pg2" class="card page">
+            <h1>IDENTITY</h1>
+            <p class="desc">Link your Discord identity to verify whitelist status.</p>
+            <input type="text" id="userField" class="input-box" placeholder="USER#0000">
+            <br>
+            <button class="btn" onclick="checkUser()">VALIDATE</button>
+        </section>
+
+        <section id="pg3" class="card page">
+            <h1>INTEGRITY</h1>
+            <p class="desc">Confirm manual operation to bypass automated filters.</p>
+            <div style="margin-bottom: 45px; display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <input type="checkbox" id="check" style="width: 25px; height: 25px; cursor: pointer; accent-color: #fff;"> 
+                <label style="letter-spacing: 2px; font-size: 0.8rem; font-weight: 700;">I CONFIRM HUMAN STATUS</label>
+            </div>
+            <button class="btn" onclick="checkCaptcha()">EXECUTE ACCESS</button>
+        </section>
+
+        <section id="pg4" class="card page">
+            <h1>ARSENIC HUB</h1>
+            <p class="credits">ENGINEERED BY ASSASSINATOR, VENOMZ & DEADLINE</p>
+            <p class="desc">Access the primary script engine. This build is optimized for performance and silent execution.</p>
+            <button class="btn" onclick="popGo('pg-script-display')">GET SCRIPT</button>
+        </section>
+
+        <section id="pg-script-display" class="card page">
+            <h1 style="font-size: 1.8rem;">ENGINE_READY</h1>
+            <p class="desc">Copy and execute the loadstring below in your preferred environment.</p>
+            <div class="script-box">
+                <span style="color: #666;">-- [[ DEADLINE EXCLUSIVE ]] --</span><br>
+                loadstring(game:HttpGet("https://pastefy.app/NFRnJia2/raw"))()
+            </div>
+            <br>
+            <button class="btn" onclick="popGo('pg5')" style="margin-top: 40px;">COMPLETE</button>
+        </section>
+
+        <section id="pg5" class="card page">
+            <h1>TERMINATED</h1>
+            <p class="desc">Authorization token expired. Safe to exit or restart.</p>
+            <button class="btn" onclick="location.reload()">RE-INITIALIZE</button>
+        </section>
+
+    </div>
+
+    <footer>ESTABLISHED 2026 // SK SCRIPTERS // LEVEL: ELITE</footer>
+
+    <script>
+        // --- LIVE STARFIELD & NEBULA BACKGROUND ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.8,
+                    speedX: (Math.random() - 0.5) * 0.4,
+                    speedY: (Math.random() - 0.5) * 0.4,
+                    opacity: Math.random()
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- INTERACTIVE POP & REDIRECT ---
+        function popGo(id) {
+            // Tactile feedback delay
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'flex';
+                // Random load time for "system feel"
+                const loadTime = 800 + Math.random() * 1000; 
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById(id).classList.add('active');
+                }, loadTime);
+            }, 100);
+        }
+
+        function checkUser() {
+            const val = document.getElementById('userField').value;
+            if (val.length >= 3) popGo('pg3');
+            else {
+                const card = document.querySelector('.active');
+                card.style.animation = 'none';
+                card.offsetHeight; /* trigger reflow */
+                card.style.animation = 'shake 0.4s';
+            }
+        }
+
+        function checkCaptcha() {
+            if (document.getElementById('check').checked) popGo('pg4');
+            else alert("INTEGRITY CHECK FAILED: BOX MUST BE MARKED");
+        }
+
+        // Add shake animation CSS dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
