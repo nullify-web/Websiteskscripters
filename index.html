@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK SCRIPTERS | Premium Scripts</title>
+    <style>
+        :root {
+            --primary: #ffffff;
+            --secondary: #000000;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --discord-color: #5865F2;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+        }
+
+        body {
+            background-color: var(--secondary);
+            color: var(--primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- LIVE BACKGROUND CANVAS --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* --- LOADING OVERLAY --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--secondary);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- NAVIGATION --- */
+        nav {
+            padding: 30px 50px;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .logo { 
+            font-size: 1rem; 
+            font-weight: 900; 
+            letter-spacing: 5px; 
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 5;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 60px 40px;
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            animation: cardFade 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes cardFade { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        h1 { 
+            font-size: 2.2rem; 
+            margin-bottom: 20px; 
+            letter-spacing: 4px; 
+            text-transform: uppercase;
+            font-weight: 900;
+            /* Reflective Effect */
+            -webkit-box-reflect: below -15px linear-gradient(transparent, rgba(255,255,255,0.1));
+        }
+
+        .desc { color: #888; line-height: 1.8; margin-bottom: 40px; font-size: 0.9rem; letter-spacing: 1px; }
+
+        /* --- INPUTS --- */
+        .input-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            padding: 16px 24px;
+            border-radius: 5px;
+            color: white;
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 25px;
+            font-size: 1rem;
+            transition: 0.4s;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .input-box:focus { 
+            border-color: var(--primary); 
+            outline: none; 
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* --- BUTTONS --- */
+        .btn-row { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+
+        .btn {
+            background: var(--primary);
+            color: var(--secondary);
+            padding: 15px 40px;
+            border-radius: 2px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: 0.4s;
+            font-size: 0.8rem;
+        }
+
+        .btn:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 25px rgba(255,255,255,0.2);
+            letter-spacing: 4px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-discord {
+            background: var(--discord-color);
+            color: white;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .captcha-wrap {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+            padding: 20px 30px;
+            border-radius: 5px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 30px;
+            gap: 15px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .page { display: none; }
+        .active { display: block; }
+
+        footer {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.6rem;
+            letter-spacing: 5px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <nav>
+        <div class="logo">SK SCRIPTERS // SYSTEM</div>
+    </nav>
+
+    <div class="wrapper">
+        
+        <section id="pg1" class="card page active">
+            <h1>SELECT ACCESS</h1>
+            <p class="desc">
+                Authorized Roblox scripting solutions. 
+                Early access and premium keys are managed via our central Owo economy shop.
+            </p>
+            <div class="btn-row">
+                <button class="btn" onclick="goTo('pg2')">ENTER HUB</button>
+                <button class="btn btn-secondary" onclick="goTo('pg-discord')">COMMUNITY</button>
+            </div>
+        </section>
+
+        <section id="pg-discord" class="card page">
+            <h1>NETWORK</h1>
+            <p class="desc">Choose a destination within our Discord infrastructure.</p>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <button class="btn btn-discord" onclick="window.open('https://discord.gg/36yw3GSEz5', '_blank')">MAIN DISCORD</button>
+                <button class="btn btn-discord" style="background: #3a45c3;" onclick="window.open('https://discord.gg/Z5r77xTt64', '_blank')">DEADLINE BRANCH</button>
+                <p style="margin-top: 15px; cursor: pointer; color: var(--primary); font-size: 0.7rem; letter-spacing: 3px; opacity: 0.5;" onclick="goTo('pg1')">RETURN HOME</p>
+            </div>
+        </section>
+
+        <section id="pg2" class="card page">
+            <h1>IDENTITY</h1>
+            <p class="desc">Input your Discord handle to verify script eligibility.</p>
+            <input type="text" id="userField" class="input-box" placeholder="USER#0000">
+            <br>
+            <button class="btn" onclick="checkUser()">AUTHENTICATE</button>
+        </section>
+
+        <section id="pg3" class="card page">
+            <h1>SECURITY</h1>
+            <p class="desc">Human verification protocol required.</p>
+            <div class="captcha-wrap">
+                <input type="checkbox" id="check" style="accent-color: var(--primary); width: 20px; height: 20px;">
+                <label for="check">VERIFY HUMAN STATUS</label>
+            </div>
+            <br>
+            <button class="btn" onclick="checkCaptcha()">CONTINUE</button>
+        </section>
+
+        <section id="pg4" class="card page">
+            <h1 style="color: #fff;">UPDATING...</h1>
+            <p class="desc">
+                SYSTEM MAINTENANCE IN PROGRESS.<br>
+                PLEASE RETURN SHORTLY FOR FULL HUB ACCESS.
+            </p>
+            <button class="btn" onclick="goTo('pg5')">EXIT</button>
+        </section>
+
+        <section id="pg5" class="card page">
+            <h1>DISCONNECTED</h1>
+            <p class="desc">Your current session has been safely terminated.</p>
+            <button class="btn" onclick="location.reload()">RE-INITIALIZE</button>
+        </section>
+
+    </div>
+
+    <footer>
+        &copy; 2026 SK SCRIPTERS GLOBAL // ALL RIGHTS RESERVED
+    </footer>
+
+    <script>
+        // --- PARTICLE SYSTEM LOGIC (White/Grey Theme) ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        initParticles();
+        animate();
+
+        // --- PAGE NAVIGATION LOGIC ---
+        function goTo(id) {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
+
+            setTimeout(() => {
+                loader.style.display = 'none';
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+            }, 1500); // Shorter load time for better feel
+        }
+
+        function checkUser() {
+            if (document.getElementById('userField').value.length >= 3) {
+                goTo('pg3');
+            } else {
+                alert("Please enter a valid username.");
+            }
+        }
+
+        function checkCaptcha() {
+            if (document.getElementById('check').checked) {
+                goTo('pg4');
+            } else {
+                alert("Please check the verification box.");
+            }
+        }
+    </script>
+</body>
+</html>
